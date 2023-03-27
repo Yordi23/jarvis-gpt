@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Jarvis-GPT</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='style.css') }}"
+		/>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	</head>
+	<body>
+		<div class="chat-container">
+			<div class="chat-header">
+				<h1>Jarvis-GPT</h1>
+			</div>
+			<div class="chat-history">
+				<ul class="messages">
+					{% for message in chat_history %}
+					<li
+						class="message{% if message.sender == 'user' %} user{% else %} bot{% endif %}"
+						data-sender="{{ message.sender }}"
+					>
+						{{ message.text }}
+					</li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div class="chat-message">
+				<form>
+					<input
+						type="text"
+						placeholder="Type your message..."
+						id="message-input"
+					/>
+					<button type="submit">Send</button>
+					<button id="record-button">Record</button>
+				</form>
+			</div>
+		</div>
+		<script>
+			(function ($) {
+				// function refresh_messages() {
+				// 	$('#message-input').val('');
+
+				// 	$.ajax({
+				// 		url: '/get_chat_history',
+				// 		method: 'GET',
+				// 		dataType: 'json',
+				// 		success: function (data) {
+				// 			// Update the list of messages
+				// 			$('.messages').empty();
+
+				// 			$.each(data.chat_history, function (index, message) {
+				// 				$('.messages').append(
+				// 					$(`<li class="message ${message.sender}">`).text(
+				// 						message.text
+				// 					)
+				// 				);
+				// 			});
+				// 		},
+				// 	});
+				// }
+
+				function receive_response_messages(messages) {
+					messages.forEach((message) => {
+						if (message.sender == 'bot') {
+							receive_response_audio(message);
+						} else {
+							$('.messages').append(
+								$(`<li class="message ${message.sender}">`).text(message.text)
+							);
+						}
+					});
+				}
+
+				function receive_response_audio(message) {
+					var url = `http://127.0.0.1:5000/get_audio/${message.id}`;
+					var audioElement = `<audio src="${url}" controls autoplay></audio>`;
+
+					$('.messages').append(
+						$(`<li class="message ${message.sender}">`)
+							.text(message.text)
+							.append(audioElement)
+					);
+				}
+
+				$(document).ready(function () {
+					// Set up the AJAX call to send a new message and refresh the list of messages when the form is submitted
+					$('form').submit(function (event) {
+						event.preventDefault();
+
+						var text = $('#message-input').val();
+						$('#message-input').val('');
+
+						$('.messages').append(
+							$(`<li class="message user">`).text(text)
+						);
+
+						$.ajax({
+							url: '/send_message',
+							method: 'POST',
+							data: JSON.stringify({ message: text }),
+							contentType: 'application/json',
+							success: function (data) {
+								receive_response_messages(data.response_messages);
+							},
+						});
+					});
+				});
+
+				var audioChunks = [];
+				var mediaRecorder;
+
+				$('#record-button').on('mousedown', function (event) {
+					event.preventDefault();
+					$(this).addClass('recording');
+					navigator.mediaDevices
+						.getUserMedia({ audio: true })
+						.then(function (stream) {
+							mediaRecorder = new MediaRecorder(stream);
+
+							mediaRecorder.addEventListener(
+								'dataavailable',
+								function (event) {
+									audioChunks.push(event.data);
+								}
+							);
+
+							mediaRecorder.addEventListener('stop', function () {
+								$(this).removeClass('recording');
+								var audioBlob = new Blob(audioChunks);
+								audioChunks = [];
+								var formData = new FormData();
+								formData.append('audio', audioBlob);
+								$.ajax({
+									url: '/send_audio',
+									type: 'POST',
+									data: formData,
+									processData: false,
+									contentType: false,
+									success: function (data) {
+										console.log('Audio sent successfully');
+
+										receive_response_messages(data.response_messages);
+									},
+									error: function (error) {
+										console.log('Error sending audio: ' + error);
+									},
+								});
+							});
+
+							mediaRecorder.start();
+						});
+				});
+
+				$('#record-button').on('mouseup', function (event) {
+					event.preventDefault();
+					mediaRecorder.stop();
+				});
+			})(jQuery);
+		</script>
+	</body>
+</html>
