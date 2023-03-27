@@ -57,7 +57,7 @@ def send_audio():
     save_path = generate_audio_from_text(bot_response)
 
     transcribe_message = insert_new_message(transcribed_text, "user")
-    response_message = insert_new_message(transcribed_text, "bot", save_path)
+    response_message = insert_new_message(bot_response, "bot", save_path)
 
     return jsonify(success=True, response_messages=[transcribe_message, response_message, ])
 
