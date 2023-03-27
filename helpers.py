@@ -5,7 +5,7 @@ import pyttsx3
 import whisper
 
 voice_engine = pyttsx3.init()
-voice_engine.setProperty('rate', 170)
+voice_engine.setProperty('rate', 175)
 voices = voice_engine.getProperty('voices')
 raul_voice = voices[1].id
 sabina_voice = voices[3].id
@@ -22,8 +22,8 @@ def generate_temp_path(filename):
     return os.path.join(temp_dir, filename)
 
 
-def generate_audio_from_text(text: str):
-    voice_engine.setProperty('voice', raul_voice)
+def generate_audio_from_text(text: str, voice=raul_voice):
+    voice_engine.setProperty('voice', voice)
 
     save_path = generate_temp_path('temp_transcription.wav')
     voice_engine.save_to_file(text, save_path)

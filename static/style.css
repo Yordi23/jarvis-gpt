@@ -1,5 +1,5 @@
 body {
-	background-color: #c1b1b2;
+	background-color: #cbf3f5c0;
 }
 
 .chat-container {
@@ -103,7 +103,7 @@ body {
 }
 
 .message.bot {
-	background-color: #9bc6e7;
+	background-color: #a1cdee;
 	border-radius: 20px;
 	padding: 10px 20px;
 	margin: 10px 0;
