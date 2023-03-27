@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, render_template, request, jsonify, send_file
 from gpt_client import send_message_to_gtp
 from helpers import generate_audio_from_text, generate_temp_path, generate_uuid, transcribe_audio
