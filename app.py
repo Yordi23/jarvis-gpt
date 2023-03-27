@@ -1,39 +1,10 @@
 from flask import Flask, render_template, request, jsonify, send_file
-import tempfile
-import os
-import whisper
-import pyttsx3
-import uuid
+from gpt_client import send_message_to_gtp
+from helpers import generate_audio_from_text, generate_temp_path, generate_uuid, transcribe_audio
 
-
-whisper_model = whisper.load_model("medium")
-voice_engine = pyttsx3.init()
-voice_engine.setProperty('rate', 170)
 
 app = Flask(__name__)
 chat_history = {}
-
-
-def generate_uuid():
-    return uuid.uuid1()
-
-
-def generate_temp_path(filename):
-    temp_dir = tempfile.mkdtemp()
-    return os.path.join(temp_dir, filename)
-
-
-def generate_audio_from_text(text: str):
-    voices = voice_engine.getProperty('voices')
-    raul_voice = voices[1].id
-    sabina_voice = voices[3].id
-    voice_engine.setProperty('voice', raul_voice)
-
-    save_path = generate_temp_path('temp_transcription.wav')
-    voice_engine.save_to_file(text, save_path)
-    voice_engine.runAndWait()
-
-    return save_path
 
 
 def insert_new_message(text, sender, audio_path=None):
@@ -65,7 +36,7 @@ def send_message():
     insert_new_message(text, "user")
 
     # Get bot response somewhere
-    bot_response = text
+    bot_response = send_message_to_gtp(text)
     save_path = generate_audio_from_text(bot_response)
 
     response_message = insert_new_message(bot_response, "bot", save_path)
@@ -76,17 +47,17 @@ def send_message():
 
 @app.route('/send_audio', methods=['POST'])
 def send_audio():
-    record_path = generate_temp_path('temp_record.wav')
+    audio_path = generate_temp_path('temp_record.wav')
 
     wav_file = request.files['audio']
-    wav_file.save(record_path)
-    transcribe_text = whisper_model.transcribe(record_path)["text"]
+    wav_file.save(audio_path)
+    transcribed_text = transcribe_audio(audio_path)
 
-    bot_response = transcribe_text
+    bot_response = send_message_to_gtp(transcribed_text)
     save_path = generate_audio_from_text(bot_response)
 
-    transcribe_message = insert_new_message(transcribe_text, "user")
-    response_message = insert_new_message(transcribe_text, "bot", save_path)
+    transcribe_message = insert_new_message(transcribed_text, "user")
+    response_message = insert_new_message(transcribed_text, "bot", save_path)
 
     return jsonify(success=True, response_messages=[transcribe_message, response_message, ])
 
