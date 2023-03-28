@@ -17,7 +17,7 @@
 				<ul class="messages">
 					{% for message in chat_history %}
 					<li
-						class="message{% if message.sender == 'user' %} user{% else %} bot{% endif %}"
+						class="message{% if message.sender == 'user' %} user{% else %} assistant{% endif %}"
 						data-sender="{{ message.sender }}"
 					>
 						{{ message.text }}
@@ -41,7 +41,7 @@
 			(function ($) {
 				function receive_response_messages(messages) {
 					messages.forEach((message) => {
-						if (message.sender == 'bot') {
+						if (message.sender == 'assistant') {
 							receive_response_audio(message);
 						} else {
 							$('.messages').append(

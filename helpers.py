@@ -4,6 +4,8 @@ import os
 import pyttsx3
 import whisper
 
+from enum import Enum
+
 voice_engine = pyttsx3.init()
 voice_engine.setProperty('rate', 175)
 voices = voice_engine.getProperty('voices')
@@ -11,6 +13,11 @@ raul_voice = voices[1].id
 sabina_voice = voices[3].id
 
 whisper_model = whisper.load_model("medium")
+
+
+class Roles(Enum):
+    USER = "user"
+    ASSISTANT = "assistant"
 
 
 def generate_uuid():

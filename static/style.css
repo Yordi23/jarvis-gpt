@@ -12,6 +12,8 @@ body {
 	border-radius: 5px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 	height: calc(100vh - 40px);
+	width: 800px;
+	max-width: 90%;
 }
 
 .chat-message {
@@ -20,8 +22,6 @@ body {
 	padding: 10px;
 	background-color: #fcf7f8;
 	border-radius: 0 0 5px 5px;
-	/* position: absolute;
-	bottom: 0; */
 }
 
 .chat-message form {
@@ -102,7 +102,7 @@ body {
 	margin-left: auto;
 }
 
-.message.bot {
+.message.assistant {
 	background-color: #a1cdee;
 	border-radius: 20px;
 	padding: 10px 20px;
@@ -115,6 +115,6 @@ body {
 	color: #dbb4ad;
 }
 
-.message.bot .user {
+.message.assistant .user {
 	color: #555;
 }

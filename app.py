@@ -3,14 +3,14 @@ load_dotenv()
 
 from flask import Flask, render_template, request, jsonify, send_file
 from gpt_client import send_message_to_gtp
-from helpers import generate_audio_from_text, generate_temp_path, generate_uuid, transcribe_audio
+from helpers import Roles, generate_audio_from_text, generate_temp_path, generate_uuid, transcribe_audio
 
 
 app = Flask(__name__)
 chat_history = {}
 
 
-def insert_new_message(text, sender, audio_path=None):
+def insert_new_message(text, sender: Roles, audio_path=None):
     id = str(generate_uuid())
 
     message = {"id": id, "sender": sender,
@@ -35,12 +35,13 @@ def get_audio(id):
 @app.route('/send_message', methods=['POST'])
 def send_message():
     text = request.json['message']
-    insert_new_message(text, "user")
+    insert_new_message(text, Roles.USER.value)
 
-    bot_response = send_message_to_gtp(text)
+    bot_response = send_message_to_gtp(text, chat_history)
     save_path = generate_audio_from_text(bot_response)
 
-    response_message = insert_new_message(bot_response, "bot", save_path)
+    response_message = insert_new_message(
+        bot_response, Roles.ASSISTANT.value, save_path)
 
     return jsonify(success=True, response_messages=[response_message])
 
@@ -53,12 +54,12 @@ def send_audio():
     wav_file.save(audio_path)
     transcribed_text = transcribe_audio(audio_path)
 
-    bot_response = send_message_to_gtp(transcribed_text)
+    bot_response = send_message_to_gtp(transcribed_text, chat_history)
     response_audio_path = generate_audio_from_text(bot_response)
 
-    transcribe_message = insert_new_message(transcribed_text, "user")
+    transcribe_message = insert_new_message(transcribed_text, Roles.USER.value)
     response_message = insert_new_message(
-        bot_response, "bot", response_audio_path)
+        bot_response, Roles.ASSISTANT.value, response_audio_path)
 
     return jsonify(success=True, response_messages=[transcribe_message, response_message, ])
 
