@@ -15,15 +15,12 @@ def parse_chat_history(chat_history):
 
     return parsed_chat_history
 
-# TODO: check why the user messages seem to be stored twice on the chat history
 
-
-def send_message_to_gtp(new_message_content, chat_history):
+def send_message_to_gtp(chat_history):
     system_message = {"role": "system",
                       "content": "You are a helpful assistant."}
-    new_message = {"role": "user", "content": new_message_content}
     parsed_chat_history = parse_chat_history(chat_history.values())
-    messages = [system_message] + parsed_chat_history + [new_message]
+    messages = [system_message] + parsed_chat_history
 
     response = openai.ChatCompletion.create(
         model=model_id,
