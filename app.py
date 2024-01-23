@@ -1,6 +1,7 @@
+import os
+
 from dotenv import load_dotenv
 load_dotenv()
-
 from flask import Flask, render_template, request, jsonify, send_file
 from gpt_client import send_message_to_gtp
 from helpers import Roles, generate_audio_from_text, generate_temp_path, generate_uuid, transcribe_audio
@@ -66,4 +67,4 @@ def send_audio():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=os.environ["PORT"])

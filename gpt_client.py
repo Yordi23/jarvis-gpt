@@ -18,7 +18,7 @@ def parse_chat_history(chat_history):
 
 def send_message_to_gtp(chat_history):
     system_message = {"role": "system",
-                      "content": "You are a helpful assistant."}
+                      "content": "You are a helpful assistant named Jarvis."}
     parsed_chat_history = parse_chat_history(chat_history.values())
     messages = [system_message] + parsed_chat_history
 

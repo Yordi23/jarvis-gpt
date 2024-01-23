@@ -52,7 +52,7 @@
 				}
 
 				function receive_response_audio(message) {
-					var url = `http://127.0.0.1:5000/get_audio/${message.id}`;
+					var url = `http://127.0.0.1:5005/get_audio/${message.id}`;
 					var audioElement = `<audio src="${url}" controls autoplay></audio>`;
 
 					$('.messages').append(
